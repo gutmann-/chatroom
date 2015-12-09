@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Flask-SocketIO Test</title>
+
+  <style type="text/css">
+  #message {
+    vertical-align: bottom;
+  }
+  </style>
+
+  <link rel="stylesheet" href="./material.min.css">
+  <script src="./material.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <script type="text/javascript" src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8">
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+var ACTIVE_ROOM = getUrlParameter("room");
+var USER = getUrlParameter("user");
+
+
+    $(document).ready(function() {
+
+      namespace = '/chat';
+      var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+      socket.on('connect', function() {
+        socket.emit('join', {room: ACTIVE_ROOM, username: USER});
+      });
+      socket.on('disconnect', function() {
+        $('#log').append('<br>Disconnected');
+      });
+      socket.on('enter', function(msg) {
+        console.log(msg);
+      });
+      socket.on('message', function(msg) {
+        $("#messages").append("<br>" + "user \"" + msg.username + "\" say: " + msg.text);
+      });
+
+      $("#message").submit(function(event) {
+        event.preventDefault();
+        text = $("#message_text").val();
+        $("#message_text").val("");
+        socket.emit('message', {username: USER, room: ACTIVE_ROOM, text: text});
+      });
+
+      $("#leave").click(function() {
+        socket.emit('leave', {room: ACTIVE_ROOM, username: USER});
+      });
+    });
+  </script>
+</head>
+<body>
+  <!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <!-- Title -->
+      <span class="mdl-layout-title">Title</span>
+      <!-- Add spacer, to align navigation to the right -->
+      <div class="mdl-layout-spacer"></div>
+
+<!-- Right aligned menu below button -->
+<button id="demo-menu-lower-right"
+        class="mdl-button mdl-js-button mdl-button--icon">
+  <i class="material-icons">more_vert</i>
+</button>
+<ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect"
+    for="demo-menu-lower-right">
+  <li id="leave" class="mdl-menu__item">Leave</li>
+</ul>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout-title">Title</span>
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="">Link</a>
+      <a class="mdl-navigation__link" href="">Link</a>
+      <a class="mdl-navigation__link" href="">Link</a>
+      <a class="mdl-navigation__link" href="">Link</a>
+    </nav>
+  </div>
+  <main class="mdl-layout__content">
+    <div class="page-content">
+      <div id="messages">
+      </div>
+      <form id="message" action="#">
+        <div class="mdl-textfield mdl-js-textfield">
+          <input class="mdl-textfield__input" type="text" id="message_text">
+          <label class="mdl-textfield__label" for="message_text">message...</label>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+</body>
+</html>
