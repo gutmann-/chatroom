@@ -36,7 +36,26 @@ var ACTIVE_ROOM = getUrlParameter("room");
 var USER = getUrlParameter("user");
 
 
+var loadAndShowRoomlist = function() {
+  $.get("/rooms/list", function(data) {
+    for (var key in data.rooms) {
+      room = data.rooms[key];
+
+      var link = document.createElement('a');
+      link.className = "mdl-navigation__link";
+      link.appendChild(document.createTextNode(room.name));
+      link.href = "?user=" + USER + "&room=" + room.name;;
+
+      $('#room_list').append(link);
+    }
+  });
+}
+
+
     $(document).ready(function() {
+
+      $('#room_name').text(ACTIVE_ROOM);
+      loadAndShowRoomlist();
 
       namespace = '/chat';
       var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
@@ -72,7 +91,7 @@ var USER = getUrlParameter("user");
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
       <!-- Title -->
-      <span class="mdl-layout-title">Title</span>
+      <span id="room_name" class="mdl-layout-title">Title</span>
       <!-- Add spacer, to align navigation to the right -->
       <div class="mdl-layout-spacer"></div>
 
@@ -88,13 +107,8 @@ var USER = getUrlParameter("user");
     </div>
   </header>
   <div class="mdl-layout__drawer">
-    <span class="mdl-layout-title">Title</span>
-    <nav class="mdl-navigation">
-      <a class="mdl-navigation__link" href="">Link</a>
-      <a class="mdl-navigation__link" href="">Link</a>
-      <a class="mdl-navigation__link" href="">Link</a>
-      <a class="mdl-navigation__link" href="">Link</a>
-    </nav>
+    <span class="mdl-layout-title">Rooms</span>
+    <nav id="room_list" class="mdl-navigation"/>
   </div>
   <main class="mdl-layout__content">
     <div class="page-content">
